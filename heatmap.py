@@ -11,6 +11,9 @@ filename = sys.argv[1]
 data_file = filename
 data = np.loadtxt(data_file)
 
+# Remove any rows where all values are zero
+data = data[~np.all(data == 0, axis=1)]
+
 # Extracting x, y, and z columns
 x = data[:, 0]
 y = data[:, 1]
@@ -24,29 +27,52 @@ xi, yi = np.meshgrid(xi, yi)
 # Interpolating z values on the created grid using scipy's griddata
 zi = griddata((x, y), z, (xi, yi), method='linear')
 
-# Define fine levels for contour plot and tick levels for color bar
-fine_levels = np.arange(0, 3.6, 0.1)  # fine levels at 0.1 intervals
-tick_levels = np.arange(0, 3.6, 0.5)  # tick levels at 0.5 intervals
+# Ask user if they want to set custom contour levels
+custom_levels = input('Do you want to set custom contour levels? (y/n): ')
+if custom_levels.lower() == 'y':
+    start_level = float(input('Enter the start level for contours (i.e. 0): '))
+    stop_level = float(input('Enter the stop level for contours (i.e. 5): '))
+    step_level = float(input('Enter the step level for contours (i.e. 0.1): '))
+    fine_levels = np.arange(start_level, stop_level, step_level)
+else:
+    # Define default fine levels for contour plot
+    fine_levels = np.arange(0, 5, 0.1)  # fine levels at 0.1 intervals
 
 # Plotting the contour map
 fig, ax = plt.subplots()
 contour_plot = plt.contourf(xi, yi, zi, levels=fine_levels, cmap=plt.cm.jet, extend='both')
-contour_plot = plt.contour(xi, yi, zi, levels=[0.39], colors='black', linewidths=1, linestyles='dotted')  # Single contour line at z=0.34
-# Plotting the filled contour map
-filled_contour = plt.contourf(xi, yi, zi, levels=fine_levels, cmap=plt.cm.jet, extend='both')
-plt.contour(xi, yi, zi, levels=[0.35], colors='black', linewidths=1, linestyles='dotted')  # Single contour line at z=0.34
 
 # Generate the color bar based on the filled contour plot
-color_bar = plt.colorbar(filled_contour, ticks=tick_levels)  # Show color scale with specified ticks
+color_bar = plt.colorbar(contour_plot)  # Show color scale with specified ticks
 
 # Set the background color of the plot to match the highest color in the colormap
 ax.set_facecolor(plt.cm.jet(1.0))  # jet(1.0) retrieves the last color in the jet colormap
 
-# Setting the limits of the y-axis and x-axis
-ax.set_ylim(-16, -7.5)
-ax.set_xlim(5, 10)
+# Ask user if they want to set custom axis limits
+customLimits = input('Do you want to set custom axis ranges? (y/n): ')
+if customLimits.lower() == 'y':
+    xmin = float(input('Enter minimum x-axis limit: '))
+    xmax = float(input('Enter maximum x-axis limit: '))
+    ymin = float(input('Enter minimum y-axis limit: '))
+    ymax = float(input('Enter maximum y-axis limit: '))
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+else:
+    ax.set_ylim(20, -20)  # Setting default limits for y-axis
+    ax.set_xlim(0, 10)     # Setting default limits for x-axis
 
-plt.xlabel('Log(K$_A$) (µM)')
-plt.ylabel('ΔH (kcal/mol)')
-plt.title(u'ISCU into (NIAU)\u2082')
+# Ask user if they want to customize axis titles
+customize_titles = input('Do you want to customize titles? (y/n): ')
+if customize_titles.lower() == 'y':
+    graph_title = input('Enter custom graph title:')
+    x_title = input('Enter custom x-axis title: ')
+    y_title = input('Enter custom y-axis title: ')
+else:
+    graph_title = 'Graph Title'
+    x_title = 'Log(K$_A$) (µM)'
+    y_title = 'ΔH (kcal/mol)'
+
+plt.xlabel(x_title)
+plt.ylabel(y_title)
+plt.title(graph_title)
 plt.show()
