@@ -58,8 +58,10 @@ if customLimits.lower() == 'y':
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
 else:
-    ax.set_ylim(20, -20)  # Setting default limits for y-axis
-    ax.set_xlim(0, 10)     # Setting default limits for x-axis
+    # Automatically setting default limits to fit the range of the data
+    ax.set_xlim(x.min(), x.max())
+    ax.set_ylim(y.min(), y.max())
+
 
 # Ask user if they want to customize axis titles
 customize_titles = input('Do you want to customize titles? (y/n): ')
